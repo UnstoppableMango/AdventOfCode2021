@@ -7,9 +7,6 @@ increases x y
     | x < y = 1
     | otherwise = 0
 
-tupleIncreases :: (Int, Int) -> Int
-tupleIncreases (x, y) = increases x y
-
 getValues :: [String] -> [Int]
 getValues = mapMaybe readMaybe
 
@@ -28,4 +25,4 @@ main = do
     input <- readFile "../input.txt"
     let values = getValues $ lines input
     let grouped = pairs $ groups values
-    print $ sum $ map tupleIncreases grouped
+    print $ sum $ map (uncurry increases) grouped
