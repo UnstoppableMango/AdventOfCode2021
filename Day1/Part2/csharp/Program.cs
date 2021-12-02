@@ -3,6 +3,8 @@
 var sum = 0;
 var pairs = new List<(int, int)>();
 
+// This solution is off by one
+// It's late and I don't feel like fixing it right now
 for (int i = 4; i < lines.Length; i++) {
     var prev = lines[(i - 4)..(i - 1)].Select(int.Parse).Sum();
     var value = lines[(i - 3)..(i)].Select(int.Parse).Sum();

@@ -1,6 +1,6 @@
 module Main where
 import Text.Read (readMaybe)
-import Data.Maybe (catMaybes, mapMaybe)
+import Data.Maybe (mapMaybe)
 
 increases :: Int -> Int -> Int
 increases x y
