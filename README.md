@@ -10,7 +10,7 @@ For the Day1 C# solution, `cd` into `Day1/csharp` and run
 dotnet run
 ```
 
-For the Haskell solutions run
+For the Haskell solutions you can run
 
 ```bash
 runhaskell Main.hs
