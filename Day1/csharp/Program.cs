@@ -26,7 +26,7 @@ static void Part2() {
     Console.WriteLine(sum);
 }
 
-Console.WriteLine("Part1");
+Console.Write("Part1 ");
 Part1();
-Console.WriteLine("Part2");
+Console.Write("Part2 ");
 Part2();
