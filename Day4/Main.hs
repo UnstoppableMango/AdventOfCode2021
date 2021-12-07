@@ -52,17 +52,21 @@ part1 (rolls, boards) = roll * score board
           where marked = map (mark r) b
 
 part2 :: Input -> Int
-part2 _ = 0
+part2 (rolls, boards) = roll * score board
+  where ([roll], [board]) = calc rolls boards
+        calc (r:rs) b
+          | all bingo marked = ([r], map (mark r) $ filter (not . bingo) b)
+          | otherwise = calc rs marked
+          where marked = map (mark r) b
 
 toBoards :: [String] -> [Board]
 toBoards [] = []
-toBoards x =
-  let clean = dropWhile (== "") x
-      board = map (map toTile . words) $ takeWhile (/= "") clean
-      rest = dropWhile (/= "") clean
-      result | rest == [""] = [board]
-             | otherwise = board : toBoards rest
-   in result
+toBoards x 
+  | rest == [""] = [board]
+  | otherwise = board : toBoards rest
+  where clean = dropWhile (== "") x
+        board = map (map toTile . words) $ takeWhile (/= "") clean
+        rest = dropWhile (/= "") clean
 
 prepare :: [String] -> Input
 prepare x = (toRolls $ head x, toBoards $ tail x)
