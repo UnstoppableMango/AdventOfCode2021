@@ -10,6 +10,13 @@ data Line = Line { start, end :: Point }
 
 type Input = [Line]
 
+partition :: Int -> [a] -> [[a]]
+partition _ [] = []
+partition n xs = take n xs : partition n (drop n xs)
+
+showGrid :: [Int] -> String
+showGrid = unlines . map show . partition 10
+
 xEqual :: Line -> Bool
 xEqual (Line start end) = x start == x end
 
@@ -17,22 +24,32 @@ yEqual :: Line -> Bool
 yEqual (Line start end) = y start == y end
 
 toRange :: Point -> Point -> [Point]
-toRange start end = map (uncurry Point) $ (,) <$> [(x start)..(x end)] <*> [(y start)..(y end)]
+toRange start end = Point <$> [(x start)..(x end)] <*> [(y start)..(y end)]
+  -- where spread 
 
-getGrid :: [Line] -> [Point]
-getGrid = generate . maxPoints . squash
+grid :: [Line] -> [Point]
+grid = generate . maxPoints . squash
   where generate = toRange (Point 0 0)
         maxPoints l = Point (maxX l) (maxY l)
-        maxX = maximum . map (\(Point x y) -> x)
-        maxY = maximum . map (\(Point x y) -> y)
+        maxX = maximum . map x
+        maxY = maximum . map y
         squash [] = []
         squash ((Line start end):xs) = start:end:squash xs
 
-covers :: Point -> Line -> Bool
-covers point (Line start end) = elem point $ toRange start end
+covers :: Line -> Point -> Bool
+covers (Line start end) point = elem point $ toRange start end
+
+countCovers :: Line -> [Point] -> [Int]
+countCovers l = map (toInt . covers l)
+  where toInt True = 1
+        toInt False = 0
+
+counts :: [Line] -> [Point] -> [Int]
+counts lines grid = foldl go (replicate (length grid) 0) lines
+  where go acc l = zipWith (+) acc $ countCovers l grid        
 
 part1 :: Input -> Int
-part1 input = 0
+part1 input = length $ filter (>=2) $ counts hv $ grid hv
   where hv = filter (liftA2 (||) xEqual yEqual) input
 
 part2 :: Input -> Int
