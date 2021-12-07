@@ -1,5 +1,7 @@
 import Text.Printf (printf)
 
+data Point { x, y :: Int }
+
 type Input = [String]
 
 part1 :: Input -> Int
