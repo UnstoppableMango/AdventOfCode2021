@@ -1,14 +1,22 @@
 module Main where
 
 import Data.Char (digitToInt)
-import Text.Printf (printf)
 import Data.Map (mapMaybe)
+import Text.Printf (printf)
+import Data.List (transpose)
 
 type Input = ([Int], [Board])
 
-data Tile = Marked | Unmarked Int deriving Show
+data Tile = Marked | Unmarked Int
+  deriving (Eq, Show)
 
 type Board = [[Tile]]
+
+testBoard :: Board
+testBoard = map (map Unmarked)
+  [ [1, 2, 3]
+  , [4, 5, 6]
+  , [7, 8, 9] ]
 
 splitOn :: Char -> String -> [String]
 splitOn c s = case dropWhile (== c) s of
@@ -20,22 +28,46 @@ splitOn c s = case dropWhile (== c) s of
 toTile :: String -> Tile
 toTile = Unmarked . read
 
+mark :: Int -> Board -> Board
+mark roll = map (map go)
+  where go x | x == Unmarked roll = Marked
+             | otherwise = x
+
+bingo :: Board -> Bool
+bingo b = rows b || cols b
+  where rows = any (all (Marked ==))
+        cols = rows . transpose
+
+score :: Board -> Int
+score = sum . map tileToInt . concat
+  where tileToInt (Unmarked x) = x
+        tileToInt _ = 0
+
 part1 :: Input -> Int
-part1 _ = 0
+part1 (rolls, boards) = roll * score board
+  where ([roll], [board]) = calc rolls boards
+        calc (r:rs) b
+          | any bingo marked = ([r], filter bingo marked)
+          | otherwise = calc rs marked
+          where marked = map (mark r) b
 
 part2 :: Input -> Int
 part2 _ = 0
 
-toBoard :: [String] -> Board
-toBoard = map (map toTile . words)
+toBoards :: [String] -> [Board]
+toBoards [] = []
+toBoards x =
+  let clean = dropWhile (== "") x
+      board = map (map toTile . words) $ takeWhile (/= "") clean
+      rest = dropWhile (/= "") clean
+      result | rest == [""] = [board]
+             | otherwise = board : toBoards rest
+   in result
 
 prepare :: [String] -> Input
 prepare x = (toRolls $ head x, toBoards $ tail x)
   where
     toRolls csv = map read $ splitOn ',' csv
-    toBoards l = map toBoard $ filter (/= []) $ transform l
-    transform [] = []
-    transform l = take 5 $ tail l : transform (drop 5 $ tail l)
 
 main :: IO ()
 main = do
