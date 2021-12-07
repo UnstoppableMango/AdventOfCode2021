@@ -24,8 +24,10 @@ yEqual :: Line -> Bool
 yEqual (Line start end) = y start == y end
 
 toRange :: Point -> Point -> [Point]
-toRange start end = Point <$> [(x start)..(x end)] <*> [(y start)..(y end)]
-  -- where spread 
+toRange start end = Point <$> spread x <*> spread y
+  where spread getDim
+          | getDim start < getDim end = [(getDim start)..(getDim end)]
+          | otherwise = [(getDim end)..(getDim start)]
 
 grid :: [Line] -> [Point]
 grid = generate . maxPoints . squash
