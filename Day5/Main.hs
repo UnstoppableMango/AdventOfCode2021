@@ -17,6 +17,13 @@ partition n xs = take n xs : partition n (drop n xs)
 showGrid :: [Int] -> String
 showGrid = unlines . map show . partition 10
 
+splitOn :: Char -> String -> [String]
+splitOn c s = case dropWhile (== c) s of
+  "" -> []
+  s' -> w : splitOn c s''
+    where
+      (w, s'') = break (== c) s'
+
 xEqual :: Line -> Bool
 xEqual (Line start end) = x start == x end
 
@@ -39,7 +46,8 @@ grid = generate . maxPoints . squash
         squash ((Line start end):xs) = start:end:squash xs
 
 covers :: Line -> Point -> Bool
-covers (Line start end) point = elem point $ toRange start end
+covers (Line (Point sx sy) (Point ex ey)) (Point x y)
+  = ()
 
 countCovers :: Line -> [Point] -> [Int]
 countCovers l = map (toInt . covers l)
@@ -64,8 +72,8 @@ prepare = map toLine
           end = toPoint $ last $ words i
         }
         toPoint csv = Point {
-          x = digitToInt $ head csv,
-          y = digitToInt $ last csv
+          x = read $ head $ splitOn ',' csv,
+          y = read $ last $ splitOn ',' csv
         }
 
 main :: IO ()
