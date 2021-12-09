@@ -1,21 +1,18 @@
 import Text.Printf (printf)
 import Data.Char (digitToInt)
 import Control.Applicative (liftA2)
+import Data.Map (fromListWith, toList)
 
 data Point = Point { x, y :: Int }
-  deriving (Eq, Show)
+  deriving (Ord, Eq, Show)
 
 data Line = Line { start, end :: Point }
   deriving (Show)
 
 type Input = [Line]
 
-partition :: Int -> [a] -> [[a]]
-partition _ [] = []
-partition n xs = take n xs : partition n (drop n xs)
-
-showGrid :: [Int] -> String
-showGrid = unlines . map show . partition 10
+frequency :: (Ord a) => [a] -> [(a, Int)]
+frequency xs = toList (fromListWith (+) [(x, 1) | x <- xs])
 
 splitOn :: Char -> String -> [String]
 splitOn c s = case dropWhile (== c) s of
@@ -31,39 +28,20 @@ yEqual :: Line -> Bool
 yEqual (Line start end) = y start == y end
 
 toRange :: Point -> Point -> [Point]
-toRange start end = Point <$> spread x <*> spread y
-  where spread getDim
-          | getDim start < getDim end = [(getDim start)..(getDim end)]
-          | otherwise = [(getDim end)..(getDim start)]
+toRange (Point x1 y1) (Point x2 y2) =
+  [ Point x y | x <- [(min x1 x2)..(max x1 x2)],
+                y <- [(min y1 y2)..(max y1 y2)],
+                ((x - x1) * (y1 - y2) ) == ((y - y1) * (x1 - x2)) ]
 
-grid :: [Line] -> [Point]
-grid = generate . maxPoints . squash
-  where generate = toRange (Point 0 0)
-        maxPoints l = Point (maxX l) (maxY l)
-        maxX = maximum . map x
-        maxY = maximum . map y
-        squash [] = []
-        squash ((Line start end):xs) = start:end:squash xs
-
-covers :: Line -> Point -> Bool
-covers (Line (Point sx sy) (Point ex ey)) (Point x y)
-  = ()
-
-countCovers :: Line -> [Point] -> [Int]
-countCovers l = map (toInt . covers l)
-  where toInt True = 1
-        toInt False = 0
-
-counts :: [Line] -> [Point] -> [Int]
-counts lines grid = foldl go (replicate (length grid) 0) lines
-  where go acc l = zipWith (+) acc $ countCovers l grid        
+allPoints :: [Line] -> [Point]
+allPoints = concatMap (\(Line start end) -> toRange start end)
 
 part1 :: Input -> Int
-part1 input = length $ filter (>=2) $ counts hv $ grid hv
+part1 input = length $ filter (>=2) $ map snd $ frequency $ allPoints hv
   where hv = filter (liftA2 (||) xEqual yEqual) input
 
 part2 :: Input -> Int
-part2 _ = 0
+part2 = length . filter (>=2) . map snd . frequency . allPoints
 
 prepare :: [String] -> Input
 prepare = map toLine
@@ -78,6 +56,6 @@ prepare = map toLine
 
 main :: IO ()
 main = do
-  input <- lines <$> readFile "./test.txt"
+  input <- lines <$> readFile "./input.txt"
   printf "Part1: %d\n" (part1 $ prepare input)
   printf "Part2: %d\n" (part2 $ prepare input)
