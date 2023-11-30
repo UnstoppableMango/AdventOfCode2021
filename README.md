@@ -1,5 +1,7 @@
 # AdventOfCode2021
 
+*!NOTE!* This repo has moved to [UnstoppableMango/advent-of-code](https://github.com/UnstoppableMango/advent-of-code/tree/main/src/2021)
+
 My Advent of Code 2021 solutions!
 
 ## Running
